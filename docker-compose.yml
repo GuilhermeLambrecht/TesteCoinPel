@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: tour_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tour_db
+      POSTGRES_USER: tour_user
+      POSTGRES_PASSWORD: secret
+    # A porta do host é parametrizada (DB_PORT) e o padrão é 5433, evitando
+    # conflito com um PostgreSQL nativo na 5432. Para usar outra porta, basta
+    # ajustar DB_PORT no .env (o container sempre escuta 5432 internamente).
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - tour_pgdata:/var/lib/postgresql/data
+
+volumes:
+  tour_pgdata:

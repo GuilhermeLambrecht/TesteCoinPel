@@ -1,0 +1,9 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    # Nível inicial seguro para o esqueleto; subir gradualmente conforme o código cresce.
+    level: 5

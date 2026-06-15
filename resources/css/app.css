@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Paleta da marca COINPEL — violeta primário (extraído das telas no Figma). */
+    --color-brand-50: #f4f0f9;
+    --color-brand-100: #e6dcf1;
+    --color-brand-200: #cdbae3;
+    --color-brand-300: #aa8fce;
+    --color-brand-400: #8260b0;
+    --color-brand-500: #663f93;
+    --color-brand-600: #5e3a87;
+    --color-brand-700: #4d2f70;
+    --color-brand-800: #3c2557;
+    --color-brand-900: #2c1b40;
+
+    /* Destaques do degradê do ícone: laranja e magenta. */
+    --color-accent-400: #f9a847;
+    --color-accent-500: #f7941d;
+    --color-accent-600: #e07c0a;
+    --color-magenta-500: #e5197e;
+}
+
+/* Evita o "flash" de elementos controlados pelo Alpine antes da hidratação. */
+[x-cloak] {
+    display: none !important;
+}
