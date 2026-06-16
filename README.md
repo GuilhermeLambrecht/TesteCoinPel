@@ -46,7 +46,7 @@ Sistema web administrativo (monolítico) para o gerenciamento de **viagens de tu
 
 ## Arquitetura e organização de pastas
 
-O projeto segue o padrão **MVC** recomendado pelo Laravel, com uma camada extra de **Services** para isolar regras de negócio dos Controllers (Controllers magros, lógica reutilizável).
+O projeto segue o padrão **MVC** recomendado pelo Laravel, com **Controllers magros**: a validação fica em **Form Requests**, a autorização em **Policies** e a saída da API em **Resources**. (Para CRUDs simples como estes, uma camada de *Service* adicionaria indireção sem ganho real — optou-se por não usá-la.)
 
 ```
 app/
@@ -55,8 +55,9 @@ app/
 │   ├── Requests/           # Form Requests: validação isolada das regras de negócio
 │   ├── Resources/          # API Resources: padronização do JSON de saída
 │   └── Middleware/         # Ex.: ForcePasswordChange (primeiro acesso)
-├── Models/                 # Eloquent Models (Trip, Vehicle, Driver, User)
-├── Services/               # Regras de negócio reutilizáveis
+├── Models/                 # Eloquent Models (Trip, Vehicle, Driver, User,
+│                           #   Package, Client, Contract, ActivityLog)
+├── Enums/                  # Enums de status (TripStatus, ContractStatus)
 └── Policies/               # Autorização por entidade
 
 database/
@@ -69,6 +70,7 @@ resources/
 │   ├── components/         # Componentes reutilizáveis (inputs, botões, layout)
 │   ├── auth/               # Login e troca de senha
 │   ├── trips/  vehicles/  drivers/  users/
+│   ├── packages/  clients/  contracts/  statistics/
 │   └── layouts/
 └── css/  js/               # Entradas do Vite/Tailwind
 
@@ -79,7 +81,7 @@ routes/
 docker-compose.yml          # Serviço do PostgreSQL
 ```
 
-**Por que esta organização:** separar `Requests`, `Resources`, `Services` e `Policies` mantém o Controller limpo, facilita testes unitários e reutilização, e deixa cada responsabilidade em um único lugar (princípio da responsabilidade única).
+**Por que esta organização:** separar `Requests`, `Resources` e `Policies` mantém o Controller limpo, facilita testes e reutilização, e deixa cada responsabilidade em um único lugar (princípio da responsabilidade única).
 
 ---
 
@@ -140,6 +142,28 @@ aproximam a aplicação de um produto real:
   `jpg/jpeg/png/webp`, máx. 2 MB), armazenada no disco `public` com nome **gerado**
   pelo Laravel; a listagem de Motoristas é apresentada em **cards** com avatar
   (placeholder com a inicial quando não há foto).
+
+**Módulos adicionais (extensões além do escopo do teste)**
+
+> O enunciado do teste permitia **propor funcionalidades**. Os módulos abaixo **não**
+> fazem parte dos requisitos (RF/RNF) — foram acrescentados para aproximar o sistema
+> de um produto real de uma agência de turismo. Seguem exatamente o mesmo padrão dos
+> CRUDs do núcleo (Form Requests, Policy, busca, paginação, *soft delete*, drawer,
+> auditoria).
+
+- **Pacotes:** CRUD do produto turístico (`name`, `destination`, `duration_days`,
+  `price`, `description`, `active`).
+- **Clientes:** CRUD do cadastro de clientes (`name`, `email` único, `phone`,
+  `document` [CPF/CNPJ] único, `active`) — gerenciado pelo admin, **sem login de
+  cliente**.
+- **Contratos:** vínculo entre um **cliente (obrigatório)** e um **pacote**, com
+  `title`, `start_date`, `end_date` (término ≥ início), `value` e `status`
+  (`rascunho`/`ativo`/`concluido`/`cancelado`). O contrato é a **ponte**: o cliente se
+  relaciona com pacotes **através** dos contratos. Listagem com *eager loading* de
+  cliente e pacote (sem N+1).
+- **Estatísticas:** painel de **números agregados** (contadores e somas — viagens por
+  status, ativos por cadastro, contratos por status, valor dos contratos ativos),
+  **sem gráficos e sem dependências novas**, em **/statistics**.
 
 ---
 
@@ -363,9 +387,10 @@ Exemplo de resposta (shape enxuto, paginado):
 - **Policies / middleware de autenticação** protegendo todas as rotas administrativas.
 - Segredos fora do versionamento (`.env` no `.gitignore`).
 - Troca obrigatória da senha provisória no primeiro acesso.
-- **Log de atividades (auditoria):** criação/edição/exclusão de registros (viagens,
-  veículos, motoristas e usuários) ficam registradas em `activity_logs` com quem fez,
-  a ação e o registro afetado. Disponível em **/activity-logs** (somente leitura).
+- **Log de atividades (auditoria):** criação/edição/exclusão de registros de qualquer
+  módulo (viagens, veículos, motoristas, usuários, pacotes, clientes e contratos) ficam
+  registradas em `activity_logs` com quem fez, a ação e o registro afetado. Disponível em
+  **/activity-logs** (somente leitura).
 
 ### Performance
 - **Eager loading** (`with()`) nos relacionamentos para evitar consultas N+1.
@@ -381,7 +406,7 @@ Exemplo de resposta (shape enxuto, paginado):
 
 ### Código limpo e organização
 - Código (variáveis, métodos, classes) em **inglês**; comentários em português.
-- Controllers magros + camada de **Services** para regras de negócio.
+- Controllers magros; validação em **Form Requests** e autorização em **Policies**.
 - Componentes Blade reutilizáveis (inputs, botões, layout), seguindo a hierarquia do design.
 - Padronização automática com **Laravel Pint** (`./vendor/bin/pint`).
 - Análise estática com **Larastan/PHPStan** para evitar erros antes da execução.
@@ -411,12 +436,32 @@ trips
  ├─ vehicle_id  → FK vehicles (indexada)
  └─ driver_id   → FK drivers  (indexada)
 
+packages
+ └─ id, name, destination, duration_days, price, description (nullable), active (bool)
+
+clients
+ └─ id, name, email (unique), phone, document (unique), active (bool)
+
+contracts
+ ├─ id, title, start_date, end_date, value
+ ├─ status (enum: rascunho | ativo | concluido | cancelado)
+ ├─ client_id   → FK clients  (obrigatória, indexada)
+ └─ package_id  → FK packages (obrigatória, indexada)
+
 activity_logs                     → auditoria (criar/editar/excluir)
  ├─ id, action, description, subject_type, subject_id
  └─ user_id → FK users
 
 personal_access_tokens            → tokens da API (Sanctum)
 ```
+
+**Relacionamentos principais:**
+
+- `Trip` **belongsTo** `Vehicle` e `Driver`; `Vehicle`/`Driver` **hasMany** `Trip`.
+- `Contract` **belongsTo** `Client` e `Package` (ambos obrigatórios).
+- `Client` **hasMany** `Contract`; `Package` **hasMany** `Contract`.
+- O **Contrato é a ponte**: um `Client` se relaciona com `Package` **através** dos
+  contratos (não há vínculo direto cliente↔pacote).
 
 Todas as tabelas de negócio usam `timestamps` e **soft deletes** para preservar
 histórico. As fotos dos motoristas ficam no disco `public` (servidas via
@@ -432,11 +477,14 @@ php artisan test                 # suíte completa (PHPUnit)
 ./vendor/bin/phpstan analyse     # análise estática (Larastan, nível 5)
 ```
 
-A suíte cobre os caminhos principais: autenticação e *rate limiting*, fluxo de
-troca de senha no 1º acesso, os 4 CRUDs (incluindo validações e *soft delete*),
-conflito de agendamento de viagens, upload/validação da foto do motorista, log
-de atividades e o endpoint da API (autenticação obrigatória e *shape* sem dados
-pessoais). Os testes rodam em **SQLite em memória**, sem depender do PostgreSQL.
+São **148 testes / 602 asserções** (todos verdes), cobrindo os caminhos principais:
+autenticação e *rate limiting*, fluxo de troca de senha no 1º acesso, todos os CRUDs
+(núcleo + pacotes, clientes e contratos), validações e *soft delete*, unicidade de
+e-mail/documento do cliente, conflito de agendamento de viagens, validação de datas e
+vínculo cliente/pacote do contrato (incluindo *eager loading* sem N+1), upload/validação
+da foto do motorista, estatísticas, log de atividades e o endpoint da API (autenticação
+obrigatória e *shape* sem dados pessoais). Os testes rodam em **SQLite em memória**, sem
+depender do PostgreSQL.
 
 ---
 

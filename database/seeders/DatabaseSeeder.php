@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
+use App\Models\Contract;
 use App\Models\Driver;
+use App\Models\Package;
 use App\Models\Trip;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -35,6 +38,14 @@ class DatabaseSeeder extends Seeder
         // Reaproveita os veículos/motoristas já criados em vez de gerar novos.
         Trip::factory(8)
             ->recycle([$vehicles, $drivers])
+            ->create();
+
+        $packages = Package::factory(6)->create();
+        $clients = Client::factory(8)->create();
+
+        // Contratos de exemplo já vinculados a clientes e pacotes existentes.
+        Contract::factory(5)
+            ->recycle([$packages, $clients])
             ->create();
     }
 }
