@@ -28,25 +28,23 @@ Sistema web administrativo (monolítico) para o gerenciamento de **viagens de tu
 
 ## Tecnologias
 
-| Categoria | Tecnologia | Versão | Função no projeto |
-|-----------|-----------|--------|-------------------|
-| Linguagem | **PHP** | 8.2+ | Linguagem base da aplicação |
-| Framework | **Laravel** | 12.x | Estrutura MVC monolítica do sistema |
-| Banco de dados | **PostgreSQL** | 16 | Persistência dos dados |
-| Estilização | **Tailwind CSS** | 4.x | UI utilitária e responsiva |
-| Bundler | **Vite** | 5.x | Compilação de assets (CSS/JS) |
-| Autenticação | **Laravel (Auth/Sanctum)** | — | Sessão web + token na API |
-| Infraestrutura | **Docker / Docker Compose** | — | Containerização do banco de dados |
-| Qualidade | **Laravel Pint / Larastan** | — | Padronização e análise estática |
-| Versionamento | **Git** | — | Controle de versão |
-
-> Substitua as versões pelas que você efetivamente utilizou (`php -v`, `composer show laravel/framework`).
+| Categoria      | Tecnologia                  | Versão  | Função no projeto                   |
+| -------------- | --------------------------- | ------- | ----------------------------------- |
+| Linguagem      | **PHP**                     | 8.5.7   | Linguagem base da aplicação         |
+| Framework      | **Laravel**                 | 13.15.0 | Estrutura MVC monolítica do sistema |
+| Banco de dados | **PostgreSQL**              | 18      | Persistência dos dados              |
+| Estilização    | **Tailwind CSS**            | 4.x     | UI utilitária e responsiva          |
+| Bundler        | **Vite**                    | 7.3.5   | Compilação de assets (CSS/JS)       |
+| Autenticação   | **Laravel (Auth/Sanctum)**  | —       | Sessão web + token na API           |
+| Infraestrutura | **Docker / Docker Compose** | —       | Containerização do banco de dados   |
+| Qualidade      | **Laravel Pint / Larastan** | —       | Padronização e análise estática     |
+| Versionamento  | **Git**                     | —       | Controle de versão                  |
 
 ---
 
 ## Arquitetura e organização de pastas
 
-O projeto segue o padrão **MVC** recomendado pelo Laravel, com **Controllers magros**: a validação fica em **Form Requests**, a autorização em **Policies** e a saída da API em **Resources**. (Para CRUDs simples como estes, uma camada de *Service* adicionaria indireção sem ganho real — optou-se por não usá-la.)
+O projeto segue o padrão **MVC** recomendado pelo Laravel, com **Controllers magros**: a validação fica em **Form Requests**, a autorização em **Policies** e a saída da API em **Resources**. (Para CRUDs simples como estes, uma camada de _Service_ adicionaria indireção sem ganho real — optou-se por não usá-la.)
 
 ```
 app/
@@ -89,26 +87,26 @@ docker-compose.yml          # Serviço do PostgreSQL
 
 ### Requisitos Funcionais
 
-| Código | Requisito | Como foi resolvido |
-|--------|-----------|--------------------|
+| Código   | Requisito                                                                        | Como foi resolvido                                                                                                                                                                                                                                                                  |
+| -------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RF01** | Gerenciar Viagens (origem, destino, horários de partida/chegada e demais campos) | CRUD completo de `Trip`, com relacionamento para veículo e motorista, **validação de datas** (chegada > partida), **status** da viagem (agendada/em andamento/concluída/cancelada) e **validação de conflito de agendamento** (mesmo veículo ou motorista em horários sobrepostos). |
-| **RF02** | Gerenciar Veículos | CRUD completo de `Vehicle` (placa, modelo, marca, capacidade, ano, status ativo/inativo). |
-| **RF03** | Gerenciar Motoristas | CRUD completo de `Driver` (nome, CPF, CNH, validade, etc.), com **foto de perfil opcional** e **listagem em cards**. |
-| **RF04** | Gerenciar Usuários administradores | CRUD de `User`, com criação de novos administradores. |
-| **RF05** | Autenticação dos administradores | Login via sessão do Laravel (`Auth`), com proteção CSRF e *rate limiting* na rota de login. |
-| **RF06** | Troca de senha obrigatória no primeiro acesso | Flag `must_change_password` no usuário + middleware `ForcePasswordChange` que redireciona para a tela de nova senha (mínimo 8 caracteres, conforme o design). |
-| **RF07** | Visualização de todos os módulos pelo administrador | Layout administrativo com menu para todos os módulos + **dashboard** com contadores e próximas viagens, protegido por autenticação. |
+| **RF02** | Gerenciar Veículos                                                               | CRUD completo de `Vehicle` (placa, modelo, marca, capacidade, ano, status ativo/inativo).                                                                                                                                                                                           |
+| **RF03** | Gerenciar Motoristas                                                             | CRUD completo de `Driver` (nome, CPF, CNH, validade, etc.), com **foto de perfil opcional** e **listagem em cards**.                                                                                                                                                                |
+| **RF04** | Gerenciar Usuários administradores                                               | CRUD de `User`, com criação de novos administradores.                                                                                                                                                                                                                               |
+| **RF05** | Autenticação dos administradores                                                 | Login via sessão do Laravel (`Auth`), com proteção CSRF e _rate limiting_ na rota de login.                                                                                                                                                                                         |
+| **RF06** | Troca de senha obrigatória no primeiro acesso                                    | Flag `must_change_password` no usuário + middleware `ForcePasswordChange` que redireciona para a tela de nova senha (mínimo 8 caracteres, conforme o design).                                                                                                                       |
+| **RF07** | Visualização de todos os módulos pelo administrador                              | Layout administrativo com menu para todos os módulos + **dashboard** com contadores e próximas viagens, protegido por autenticação.                                                                                                                                                 |
 
 ### Requisitos Não Funcionais
 
-| Código | Requisito | Como foi resolvido |
-|--------|-----------|--------------------|
-| **RNF01** | Senhas criptografadas no banco | Hash automático via `Hash::make` / cast `hashed` do Eloquent (Bcrypt). Senha nunca é armazenada ou retornada em texto puro. |
-| **RNF02** | Laravel 12 monolítico | Aplicação única em Laravel 12, com web e API no mesmo projeto. |
-| **RNF03** | API REST com endpoint que lista todas as viagens em JSON | Endpoint `GET /api/trips` retornando JSON padronizado via API Resource. |
-| **RNF05** | Banco de dados PostgreSQL | Driver `pgsql`, banco rodando em container Docker. |
-| **RNF06** | Tailwind CSS | Toda a UI construída com Tailwind. |
-| **RNF07** | Responsividade | Layout responsivo (mobile-first) com utilitários de breakpoint do Tailwind. |
+| Código    | Requisito                                                | Como foi resolvido                                                                                                          |
+| --------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **RNF01** | Senhas criptografadas no banco                           | Hash automático via `Hash::make` / cast `hashed` do Eloquent (Bcrypt). Senha nunca é armazenada ou retornada em texto puro. |
+| **RNF02** | Laravel 12 monolítico                                    | Aplicação única em Laravel 12, com web e API no mesmo projeto.                                                              |
+| **RNF03** | API REST com endpoint que lista todas as viagens em JSON | Endpoint `GET /api/trips` retornando JSON padronizado via API Resource.                                                     |
+| **RNF05** | Banco de dados PostgreSQL                                | Driver `pgsql`, banco rodando em container Docker.                                                                          |
+| **RNF06** | Tailwind CSS                                             | Toda a UI construída com Tailwind.                                                                                          |
+| **RNF07** | Responsividade                                           | Layout responsivo (mobile-first) com utilitários de breakpoint do Tailwind.                                                 |
 
 > **Observação:** a numeração do documento original pula de **RNF03** para **RNF05** (não existe RNF04). Mantive a numeração original para rastreabilidade.
 
@@ -120,13 +118,15 @@ Além dos requisitos obrigatórios, o sistema entrega um conjunto de recursos qu
 aproximam a aplicação de um produto real:
 
 **Núcleo (requisitos)**
+
 - **4 CRUDs completos** — Viagens, Veículos, Motoristas e Usuários, com busca,
-  paginação e *soft delete*.
-- **Autenticação** por sessão (login/logout) com *rate limiting* e CSRF.
+  paginação e _soft delete_.
+- **Autenticação** por sessão (login/logout) com _rate limiting_ e CSRF.
 - **Troca de senha obrigatória no 1º acesso** (apresentada como modal, não dispensável).
 - **API REST** `GET /api/trips` (JSON padronizado via API Resource).
 
 **Extras**
+
 - **Validação de conflito de agendamento:** ao criar/editar uma viagem, o sistema
   bloqueia o mesmo **veículo** ou **motorista** em horários que se sobrepõem.
 - **Status da viagem:** `agendada` (padrão), `em_andamento`, `concluida`, `cancelada` —
@@ -148,7 +148,7 @@ aproximam a aplicação de um produto real:
 > O enunciado do teste permitia **propor funcionalidades**. Os módulos abaixo **não**
 > fazem parte dos requisitos (RF/RNF) — foram acrescentados para aproximar o sistema
 > de um produto real de uma agência de turismo. Seguem exatamente o mesmo padrão dos
-> CRUDs do núcleo (Form Requests, Policy, busca, paginação, *soft delete*, drawer,
+> CRUDs do núcleo (Form Requests, Policy, busca, paginação, _soft delete_, drawer,
 > auditoria).
 
 - **Pacotes:** CRUD do produto turístico (`name`, `destination`, `duration_days`,
@@ -159,7 +159,7 @@ aproximam a aplicação de um produto real:
 - **Contratos:** vínculo entre um **cliente (obrigatório)** e um **pacote**, com
   `title`, `start_date`, `end_date` (término ≥ início), `value` e `status`
   (`rascunho`/`ativo`/`concluido`/`cancelado`). O contrato é a **ponte**: o cliente se
-  relaciona com pacotes **através** dos contratos. Listagem com *eager loading* de
+  relaciona com pacotes **através** dos contratos. Listagem com _eager loading_ de
   cliente e pacote (sem N+1).
 - **Estatísticas:** painel de **números agregados** (contadores e somas — viagens por
   status, ativos por cadastro, contratos por status, valor dos contratos ativos),
@@ -226,23 +226,23 @@ O PostgreSQL roda isolado em um container, evitando instalar o banco diretamente
 
 ```yaml
 services:
-  database:
-    image: postgres:16-alpine
-    container_name: tour_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: tour_db
-      POSTGRES_USER: tour_user
-      POSTGRES_PASSWORD: secret
-    # A porta do host é parametrizada via DB_PORT (padrão 5433, para não conflitar
-    # com um PostgreSQL nativo na 5432). Ajuste DB_PORT no .env se precisar de outra.
-    ports:
-      - "${DB_PORT:-5433}:5432"
-    volumes:
-      - tour_pgdata:/var/lib/postgresql/data
+    database:
+        image: postgres:16-alpine
+        container_name: tour_postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: tour_db
+            POSTGRES_USER: tour_user
+            POSTGRES_PASSWORD: secret
+        # A porta do host é parametrizada via DB_PORT (padrão 5433, para não conflitar
+        # com um PostgreSQL nativo na 5432). Ajuste DB_PORT no .env se precisar de outra.
+        ports:
+            - "${DB_PORT:-5433}:5432"
+        volumes:
+            - tour_pgdata:/var/lib/postgresql/data
 
 volumes:
-  tour_pgdata:
+    tour_pgdata:
 ```
 
 Comandos úteis:
@@ -316,11 +316,11 @@ metadados de paginação do Laravel (`links` e `meta`).
 
 **Filtros opcionais e combináveis** (query string):
 
-| Parâmetro | Efeito |
-|---|---|
-| `?origin=` | viagens cuja **origem** contém o texto (case-insensitive) |
+| Parâmetro       | Efeito                                                     |
+| --------------- | ---------------------------------------------------------- |
+| `?origin=`      | viagens cuja **origem** contém o texto (case-insensitive)  |
 | `?destination=` | viagens cujo **destino** contém o texto (case-insensitive) |
-| `?date=` | viagens com **partida a partir** da data (`YYYY-MM-DD`) |
+| `?date=`        | viagens com **partida a partir** da data (`YYYY-MM-DD`)    |
 
 Ex.: `GET /api/trips?destination=Gramado&date=2025-06-01&page=2`. Sem parâmetros, retorna
 todas as viagens paginadas.
@@ -344,30 +344,34 @@ Exemplo de resposta (shape enxuto, paginado):
 
 ```json
 {
-  "data": [
-    {
-      "id": 1,
-      "origin": "Pelotas",
-      "destination": "Gramado",
-      "departure_at": "2025-06-20T08:00:00.000000Z",
-      "arrival_at": "2025-06-20T14:30:00.000000Z",
-      "status": "agendada",
-      "vehicle": { "id": 3, "plate": "ABC1D23", "model": "Marcopolo Paradiso" },
-      "driver":  { "id": 5, "name": "João Silva" }
+    "data": [
+        {
+            "id": 1,
+            "origin": "Pelotas",
+            "destination": "Gramado",
+            "departure_at": "2025-06-20T08:00:00.000000Z",
+            "arrival_at": "2025-06-20T14:30:00.000000Z",
+            "status": "agendada",
+            "vehicle": {
+                "id": 3,
+                "plate": "ABC1D23",
+                "model": "Marcopolo Paradiso"
+            },
+            "driver": { "id": 5, "name": "João Silva" }
+        }
+    ],
+    "links": {
+        "first": "http://localhost:8000/api/trips?page=1",
+        "last": "http://localhost:8000/api/trips?page=2",
+        "prev": null,
+        "next": "http://localhost:8000/api/trips?page=2"
+    },
+    "meta": {
+        "current_page": 1,
+        "last_page": 2,
+        "per_page": 15,
+        "total": 23
     }
-  ],
-  "links": {
-    "first": "http://localhost:8000/api/trips?page=1",
-    "last":  "http://localhost:8000/api/trips?page=2",
-    "prev":  null,
-    "next":  "http://localhost:8000/api/trips?page=2"
-  },
-  "meta": {
-    "current_page": 1,
-    "last_page": 2,
-    "per_page": 15,
-    "total": 23
-  }
 }
 ```
 
@@ -379,6 +383,7 @@ Exemplo de resposta (shape enxuto, paginado):
 ## Boas práticas adotadas
 
 ### Segurança
+
 - Senhas com **hash Bcrypt** (RNF01); nunca trafegam nem são salvas em texto puro.
 - Proteção **CSRF** em todos os formulários (padrão do Laravel).
 - Validação centralizada em **Form Requests**, evitando dados inválidos no banco.
@@ -393,6 +398,7 @@ Exemplo de resposta (shape enxuto, paginado):
   **/activity-logs** (somente leitura).
 
 ### Performance
+
 - **Eager loading** (`with()`) nos relacionamentos para evitar consultas N+1.
 - **Paginação** nas listagens para não carregar tabelas inteiras.
 - **Índices** em chaves estrangeiras e colunas mais consultadas.
@@ -400,11 +406,13 @@ Exemplo de resposta (shape enxuto, paginado):
 - Assets minificados em produção via `npm run build`.
 
 ### Infraestrutura
+
 - Banco de dados containerizado com **Docker**, garantindo paridade de ambiente.
 - Volume persistente para os dados do PostgreSQL.
 - `.env.example` documentado para subida rápida do projeto.
 
 ### Código limpo e organização
+
 - Código (variáveis, métodos, classes) em **inglês**; comentários em português.
 - Controllers magros; validação em **Form Requests** e autorização em **Policies**.
 - Componentes Blade reutilizáveis (inputs, botões, layout), seguindo a hierarquia do design.
@@ -477,18 +485,18 @@ php artisan test                 # suíte completa (PHPUnit)
 ./vendor/bin/phpstan analyse     # análise estática (Larastan, nível 5)
 ```
 
-São **148 testes / 602 asserções** (todos verdes), cobrindo os caminhos principais:
-autenticação e *rate limiting*, fluxo de troca de senha no 1º acesso, todos os CRUDs
-(núcleo + pacotes, clientes e contratos), validações e *soft delete*, unicidade de
+São **151 testes / 610 asserções** (todos verdes), cobrindo os caminhos principais:
+autenticação e _rate limiting_, fluxo de troca de senha no 1º acesso, todos os CRUDs
+(núcleo + pacotes, clientes e contratos), validações e _soft delete_, unicidade de
 e-mail/documento do cliente, conflito de agendamento de viagens, validação de datas e
-vínculo cliente/pacote do contrato (incluindo *eager loading* sem N+1), upload/validação
+vínculo cliente/pacote do contrato (incluindo _eager loading_ sem N+1), upload/validação
 da foto do motorista, estatísticas, log de atividades e o endpoint da API (autenticação
-obrigatória e *shape* sem dados pessoais). Os testes rodam em **SQLite em memória**, sem
+obrigatória e _shape_ sem dados pessoais). Os testes rodam em **SQLite em memória**, sem
 depender do PostgreSQL.
 
 ---
 
-##  Autor
+## Autor
 
 **Guilherme Silva Lambrecht** — [GitHub](https://github.com/GuilhermeLambrecht) · [LinkedIn](https://www.linkedin.com/in/guilherme-lambrecht-3160253a1/)
 
