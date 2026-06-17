@@ -15,30 +15,54 @@
     <title>{{ $title }} · Tour Projetos</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-white font-sans text-brand-900 antialiased">
-    {{-- Checkbox CSS-only para alternar a sidebar no mobile (sem JS). --}}
-    <input type="checkbox" id="sidebar-toggle" class="peer hidden">
-
-    {{-- Botão flutuante (mobile) para abrir a sidebar — some quando ela está aberta.
-         Substitui o antigo hambúrguer do topbar, que foi removido. --}}
-    <label for="sidebar-toggle"
-           class="fixed left-3 top-3 z-40 cursor-pointer rounded-lg bg-white p-2 text-brand-700 shadow-sm ring-1 ring-brand-100 lg:hidden peer-checked:hidden">
+<body
+    x-data="{ sidebarOpen: false }"
+    @keydown.escape.window="sidebarOpen = false"
+    @resize.window="if (window.innerWidth >= 1024) sidebarOpen = false"
+    class="min-h-screen bg-white font-sans text-brand-900 antialiased"
+>
+    {{-- Botão flutuante (mobile) que abre a sidebar — some no desktop e quando
+         ela já está aberta. Substitui o antigo hambúrguer do topbar removido. --}}
+    <button type="button" @click="sidebarOpen = true"
+            :class="{ 'hidden': sidebarOpen }"
+            aria-label="Abrir menu"
+            class="fixed left-3 top-3 z-30 cursor-pointer rounded-lg bg-white p-2 text-brand-700 shadow-sm ring-1 ring-brand-100 lg:hidden">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-    </label>
+    </button>
+
+    {{-- Backdrop escurecido (mobile): cobre o conteúdo e fecha a sidebar ao clicar fora. --}}
+    <div x-cloak x-show="sidebarOpen"
+         x-transition.opacity
+         @click="sidebarOpen = false"
+         aria-hidden="true"
+         class="fixed inset-0 z-40 bg-brand-900/40 lg:hidden"></div>
 
     <div class="flex min-h-screen">
-        {{-- Sidebar --}}
+        {{-- Sidebar: drawer sobreposto no mobile, fixa e estática no desktop.
+             O translate-x-0! (important) garante que o estado aberto vença o
+             -translate-x-full padrão de forma confiável. --}}
         <aside
-            class="fixed inset-y-0 left-0 z-30 flex w-56 -translate-x-full flex-col bg-brand-600 transition-transform
-                   peer-checked:translate-x-0 lg:static lg:translate-x-0"
+            :class="{ 'translate-x-0!': sidebarOpen }"
+            class="fixed inset-y-0 left-0 z-50 flex w-56 -translate-x-full flex-col bg-brand-600 transition-transform
+                   lg:static lg:z-auto lg:translate-x-0"
         >
-            <div class="flex h-24 items-center justify-center px-6">
+            <div class="relative flex h-24 items-center justify-center px-6">
                 <img src="{{ asset('images/coinPelLogoBranco.png') }}" alt="COINPEL" class="h-16 w-auto object-contain" />
+
+                {{-- Fecha a sidebar (visível só no mobile). --}}
+                <button type="button" @click="sidebarOpen = false"
+                        aria-label="Fechar menu"
+                        class="absolute right-3 top-3 rounded-lg p-1.5 text-brand-100 transition hover:bg-white/10 hover:text-white lg:hidden">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <nav class="flex flex-1 flex-col gap-1 px-3 py-4">
+            {{-- Clicar num item do menu fecha a sidebar no mobile (no desktop é inócuo). --}}
+            <nav @click="sidebarOpen = false" class="flex flex-1 flex-col gap-1 px-3 py-4">
                 <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     <x-slot:icon>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -96,10 +120,6 @@
                 </x-nav-link>
             </nav>
         </aside>
-
-        {{-- Overlay do mobile ao abrir a sidebar --}}
-        <label for="sidebar-toggle"
-               class="fixed inset-0 z-20 hidden bg-brand-900/40 peer-checked:block lg:hidden"></label>
 
         {{-- Coluna principal (sem topbar; o fundo é branco) --}}
         <div class="flex min-w-0 flex-1 flex-col">
