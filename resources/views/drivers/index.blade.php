@@ -1,23 +1,13 @@
-<x-layouts.app title="Motoristas" heading="Motoristas">
-    <x-slot:actions>
-        <x-button :href="route('drivers.create')" variant="primary">+ Adicionar motorista</x-button>
-    </x-slot:actions>
-
-    <div class="space-y-4">
-        {{-- Busca por nome/CPF --}}
-        <form method="GET" action="{{ route('drivers.index') }}" class="flex gap-2">
-            <div class="relative flex-1 sm:max-w-xs">
-                <input
-                    type="search"
-                    name="search"
-                    value="{{ $search }}"
-                    placeholder="Pesquisar por nome ou CPF"
-                    class="w-full rounded-lg border border-brand-200 bg-white px-3.5 py-2.5 text-sm text-brand-900
-                           placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-                />
-            </div>
-            <x-button type="submit" variant="secondary">Filtrar</x-button>
-        </form>
+<x-layouts.app title="Motoristas" :toolbar="true">
+    <div class="space-y-6">
+        {{-- Barra superior no novo padrão; o conteúdo segue em cards (abaixo). --}}
+        <x-list-toolbar
+            :create-url="route('drivers.create')"
+            create-label="+ Adicionar motorista"
+            :action="route('drivers.index')"
+            :search="$search"
+            placeholder="Pesquisar por nome ou CPF"
+        />
 
         {{-- Listagem em cards: 1 por linha no mobile, 2 no desktop --}}
         @if ($drivers->count())

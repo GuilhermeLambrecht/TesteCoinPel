@@ -37,6 +37,8 @@ class StoreContractRequest extends FormRequest
     {
         return [
             'end_date.after_or_equal' => 'A data de término deve ser igual ou posterior à data de início.',
+            'client_id.exists' => 'Selecione um cliente ativo.',
+            'package_id.exists' => 'Selecione um pacote ativo.',
         ];
     }
 

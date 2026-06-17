@@ -8,7 +8,6 @@ use App\Models\Contract;
 use App\Models\Driver;
 use App\Models\Package;
 use App\Models\Trip;
-use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -32,24 +31,27 @@ class StatisticsController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        // Contratos ativos: reaproveita a contagem agrupada (sem query extra).
+        $contractsActive = (int) ($contractsByStatus[ContractStatus::Ativo->value] ?? 0);
+
         return view('statistics.index', [
+            // Indicadores principais (topo).
             'tripsTotal' => Trip::count(),
-            'tripStatuses' => $this->statusCounts(TripStatus::cases(), $tripsByStatus),
-
-            'vehiclesTotal' => Vehicle::count(),
-            'vehiclesActive' => Vehicle::where('active', true)->count(),
-
-            'driversTotal' => Driver::count(),
+            'contractsActiveValue' => (float) Contract::where('status', ContractStatus::Ativo->value)->sum('value'),
+            'contractsActive' => $contractsActive,
             'driversActive' => Driver::where('active', true)->count(),
 
-            'packagesTotal' => Package::count(),
-            'packagesActive' => Package::where('active', true)->count(),
-
+            // Operação (viagens por status) e Negócio (contratos por status).
+            'tripStatuses' => $this->statusCounts(TripStatus::cases(), $tripsByStatus),
             'contractsTotal' => Contract::count(),
             'contractStatuses' => $this->statusCounts(ContractStatus::cases(), $contractsByStatus),
-            'contractsActiveValue' => (float) Contract::where('status', ContractStatus::Ativo->value)->sum('value'),
 
-            'usersTotal' => User::count(),
+            // Frota e equipe (ativo / total).
+            'vehiclesTotal' => Vehicle::count(),
+            'vehiclesActive' => Vehicle::where('active', true)->count(),
+            'driversTotal' => Driver::count(),
+            'packagesTotal' => Package::count(),
+            'packagesActive' => Package::where('active', true)->count(),
         ]);
     }
 

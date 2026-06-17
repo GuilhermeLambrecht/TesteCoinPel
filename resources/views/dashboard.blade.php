@@ -1,7 +1,7 @@
 <x-layouts.app title="Dashboard" heading="Dashboard">
-    <div class="space-y-6">
+    <div class="space-y-8">
         {{-- Saudação --}}
-        <div class="rounded-xl border border-brand-100 bg-white p-6 shadow-sm">
+        <div class="rounded-xl border border-gray-200 bg-white p-6">
             <h2 class="text-lg font-semibold text-brand-900">
                 Bem-vindo, {{ auth()->user()->name }}
             </h2>
@@ -11,7 +11,7 @@
         </div>
 
         {{-- Contadores --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <x-stat-card label="Viagens" :value="$tripsCount">
                 <x-slot:icon>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h8m-9 8h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2zm1-2h.01M15 18h.01" />

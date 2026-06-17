@@ -54,15 +54,24 @@ class StatisticsTest extends TestCase
 
         $response->assertOk()->assertSee('Estatísticas');
 
+        // Indicadores principais.
         $this->assertSame(3, $response->viewData('tripsTotal'));
+        $this->assertSame(1500.0, $response->viewData('contractsActiveValue'));
+        $this->assertSame(2, $response->viewData('contractsActive'));
+        $this->assertSame(1, $response->viewData('driversActive'));
+
+        // Frota e equipe (ativo / total).
         $this->assertSame(3, $response->viewData('vehiclesTotal'));
         $this->assertSame(2, $response->viewData('vehiclesActive'));
         $this->assertSame(2, $response->viewData('driversTotal'));
-        $this->assertSame(1, $response->viewData('driversActive'));
         $this->assertSame(3, $response->viewData('packagesTotal'));
         $this->assertSame(2, $response->viewData('packagesActive'));
         $this->assertSame(3, $response->viewData('contractsTotal'));
-        $this->assertSame(1500.0, $response->viewData('contractsActiveValue'));
+
+        // Proporções renderizadas (X de Y — Z%): motoristas 1 de 2 = 50%;
+        // viagens agendadas 2 de 3 = 67%.
+        $response->assertSee('1 de 2')->assertSee('50%');
+        $response->assertSee('2 de 3')->assertSee('67%');
 
         // Contagem por status das viagens.
         $tripStatuses = collect($response->viewData('tripStatuses'));

@@ -1,25 +1,14 @@
-<x-layouts.app title="Contratos" heading="Contratos">
-    <x-slot:actions>
-        <x-button :href="route('contracts.create')" variant="primary">+ Adicionar contrato</x-button>
-    </x-slot:actions>
+<x-layouts.app title="Contratos" :toolbar="true">
+    <div class="space-y-6">
+        <x-list-toolbar
+            :create-url="route('contracts.create')"
+            create-label="+ Adicionar contrato"
+            :action="route('contracts.index')"
+            :search="$search"
+            placeholder="Pesquisar por título"
+        />
 
-    <div class="space-y-4">
-        {{-- Busca por título --}}
-        <form method="GET" action="{{ route('contracts.index') }}" class="flex gap-2">
-            <div class="relative flex-1 sm:max-w-xs">
-                <input
-                    type="search"
-                    name="search"
-                    value="{{ $search }}"
-                    placeholder="Pesquisar por título"
-                    class="w-full rounded-lg border border-brand-200 bg-white px-3.5 py-2.5 text-sm text-brand-900
-                           placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-                />
-            </div>
-            <x-button type="submit" variant="secondary">Filtrar</x-button>
-        </form>
-
-        <x-table :headers="['Status', 'Título', 'Cliente', 'Pacote', 'Vigência', 'Valor', '']">
+        <x-table :flush="true" :headers="['Status', 'Título', 'Cliente', 'Pacote', 'Vigência', 'Valor', '']">
             @forelse ($contracts as $contract)
                 <tr class="transition hover:bg-gray-50">
                     <td class="px-4 py-3">

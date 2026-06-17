@@ -50,7 +50,14 @@ class ClientController extends Controller
     {
         $this->authorize('update', $client);
 
-        return view('clients.edit', compact('client'));
+        // Contratos do cliente para exibição (somente leitura) no drawer.
+        // with('package') evita N+1 ao mostrar o pacote de cada contrato.
+        $contracts = $client->contracts()
+            ->with('package')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('clients.edit', compact('client', 'contracts'));
     }
 
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse

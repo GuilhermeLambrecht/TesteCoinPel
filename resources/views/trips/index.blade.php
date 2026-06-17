@@ -1,33 +1,24 @@
-<x-layouts.app title="Viagens" heading="Viagens">
-    <x-slot:actions>
-        <x-button :href="route('trips.create')" variant="primary">+ Adicionar viagem</x-button>
-    </x-slot:actions>
-
-    <div class="space-y-4">
+<x-layouts.app title="Viagens" :toolbar="true">
+    <div class="space-y-6">
         {{-- Busca por origem/destino + filtro por data de partida --}}
-        <form method="GET" action="{{ route('trips.index') }}" class="flex flex-wrap gap-2">
-            <div class="relative flex-1 sm:max-w-xs">
-                <input
-                    type="search"
-                    name="search"
-                    value="{{ $search }}"
-                    placeholder="Pesquisar por origem ou destino"
-                    class="w-full rounded-lg border border-brand-200 bg-white px-3.5 py-2.5 text-sm text-brand-900
-                           placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-                />
-            </div>
+        <x-list-toolbar
+            :create-url="route('trips.create')"
+            create-label="+ Adicionar viagem"
+            :action="route('trips.index')"
+            :search="$search"
+            placeholder="Pesquisar por origem ou destino"
+        >
             <input
                 type="date"
                 name="date"
                 value="{{ $date }}"
                 aria-label="Partir a partir de"
-                class="rounded-lg border border-brand-200 bg-white px-3.5 py-2.5 text-sm text-brand-900
+                class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-brand-900 sm:w-auto
                        focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
             />
-            <x-button type="submit" variant="secondary">Filtrar</x-button>
-        </form>
+        </x-list-toolbar>
 
-        <x-table :headers="['Status', 'Trajeto', 'Partida', 'Chegada', 'Veículo', 'Motorista', '']">
+        <x-table :flush="true" :headers="['Status', 'Trajeto', 'Partida', 'Chegada', 'Veículo', 'Motorista', '']">
             @forelse ($trips as $trip)
                 <tr class="transition hover:bg-gray-50">
                     <td class="px-4 py-3">

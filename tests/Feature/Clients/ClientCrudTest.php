@@ -3,8 +3,11 @@
 namespace Tests\Feature\Clients;
 
 use App\Models\Client;
+use App\Models\Contract;
+use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ClientCrudTest extends TestCase
@@ -192,6 +195,51 @@ class ClientCrudTest extends TestCase
             ->assertOk()
             ->assertSee('Joana Encontrada')
             ->assertDontSee('Pedro Oculto');
+    }
+
+    public function test_client_edit_shows_their_contracts(): void
+    {
+        $client = Client::factory()->create();
+        $package = Package::factory()->create(['name' => 'Pacote Vinculado']);
+        Contract::factory()->create([
+            'client_id' => $client->id,
+            'package_id' => $package->id,
+            'title' => 'Contrato do Cliente',
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get("/clients/{$client->id}/edit")
+            ->assertOk()
+            ->assertSee('Contrato do Cliente')
+            ->assertSee('Pacote Vinculado');
+    }
+
+    public function test_client_edit_shows_empty_state_without_contracts(): void
+    {
+        $client = Client::factory()->create();
+
+        $this->actingAs($this->admin())
+            ->get("/clients/{$client->id}/edit")
+            ->assertOk()
+            ->assertSee('Nenhum contrato para este cliente');
+    }
+
+    public function test_client_edit_loads_contracts_without_n_plus_one(): void
+    {
+        $admin = $this->admin();
+        $client = Client::factory()->create();
+        // 5 contratos, cada um com seu pacote.
+        Contract::factory()->count(5)->create(['client_id' => $client->id]);
+
+        DB::enableQueryLog();
+        $response = $this->actingAs($admin)->get("/clients/{$client->id}/edit");
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $response->assertOk();
+        // client (route binding) + contratos + pacotes (eager) = constante; sem N+1.
+        // Sem eager loading, cada um dos 5 contratos faria uma query extra do pacote.
+        $this->assertLessThanOrEqual(6, count($queries));
     }
 
     public function test_list_is_paginated(): void

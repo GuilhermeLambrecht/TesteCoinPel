@@ -9,17 +9,19 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Paleta da marca COINPEL — violeta primário (extraído das telas no Figma). */
-    --color-brand-50: #f4f0f9;
-    --color-brand-100: #e6dcf1;
-    --color-brand-200: #cdbae3;
-    --color-brand-300: #aa8fce;
-    --color-brand-400: #8260b0;
-    --color-brand-500: #663f93;
-    --color-brand-600: #5e3a87;
-    --color-brand-700: #4d2f70;
-    --color-brand-800: #3c2557;
-    --color-brand-900: #2c1b40;
+    /* Paleta da marca COINPEL — violeta primário (extraído das telas no Figma).
+       Tom levemente mais escuro e consistente em toda a escala (propaga a todas
+       as telas via tokens brand-*). */
+    --color-brand-50: #f1ecf7;
+    --color-brand-100: #e1d5ee;
+    --color-brand-200: #c4afdd;
+    --color-brand-300: #9f81c5;
+    --color-brand-400: #74519b;
+    --color-brand-500: #58327e;
+    --color-brand-600: #4f2d72;
+    --color-brand-700: #40265e;
+    --color-brand-800: #311d49;
+    --color-brand-900: #221432;
 
     /* Destaques do degradê do ícone: laranja e magenta. */
     --color-accent-400: #f9a847;

@@ -1,6 +1,9 @@
 @props([
     'title' => 'Tour Projetos',
     'heading' => null,
+    // true nas telas com toolbar (listagens): elas mesmas renderizam o admin+sair.
+    // false (padrão): o layout mostra o admin+sair no topo direito do conteúdo.
+    'toolbar' => false,
 ])
 
 <!DOCTYPE html>
@@ -12,14 +15,23 @@
     <title>{{ $title }} · Tour Projetos</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-brand-50 font-sans text-brand-900 antialiased">
+<body class="min-h-screen bg-white font-sans text-brand-900 antialiased">
     {{-- Checkbox CSS-only para alternar a sidebar no mobile (sem JS). --}}
     <input type="checkbox" id="sidebar-toggle" class="peer hidden">
+
+    {{-- Botão flutuante (mobile) para abrir a sidebar — some quando ela está aberta.
+         Substitui o antigo hambúrguer do topbar, que foi removido. --}}
+    <label for="sidebar-toggle"
+           class="fixed left-3 top-3 z-40 cursor-pointer rounded-lg bg-white p-2 text-brand-700 shadow-sm ring-1 ring-brand-100 lg:hidden peer-checked:hidden">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </label>
 
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
         <aside
-            class="fixed inset-y-0 left-0 z-30 flex w-64 -translate-x-full flex-col bg-brand-600 transition-transform
+            class="fixed inset-y-0 left-0 z-30 flex w-56 -translate-x-full flex-col bg-brand-600 transition-transform
                    peer-checked:translate-x-0 lg:static lg:translate-x-0"
         >
             <div class="flex h-24 items-center justify-center px-6">
@@ -34,62 +46,39 @@
                     Dashboard
                 </x-nav-link>
 
-                <x-nav-link :href="route('trips.index')" :active="request()->routeIs('trips.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h8m-9 8h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2zm1-2h.01M15 18h.01" />
-                    </x-slot:icon>
-                    Viagens
-                </x-nav-link>
-
-                <x-nav-link :href="route('vehicles.index')" :active="request()->routeIs('vehicles.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 17H3V6a1 1 0 011-1h11v12m-4 0h2m4 0h2v-5l-3-4h-5" />
-                    </x-slot:icon>
-                    Veículos
-                </x-nav-link>
-
-                <x-nav-link :href="route('drivers.index')" :active="request()->routeIs('drivers.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </x-slot:icon>
-                    Motoristas
-                </x-nav-link>
-
-                <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </x-slot:icon>
-                    Pacotes
-                </x-nav-link>
-
-                <x-nav-link :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </x-slot:icon>
-                    Contratos
-                </x-nav-link>
-
-                <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 13a2 2 0 100-4 2 2 0 000 4zm0 0c-1.333 0-2.5.667-3 1.5M14 10h4m-4 3h2" />
-                    </x-slot:icon>
+                <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')"
+                            :icon-image="asset('images/system-uicons_users.png')">
                     Clientes
                 </x-nav-link>
 
-                <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </x-slot:icon>
-                    Usuários
+                <x-nav-link :href="route('drivers.index')" :active="request()->routeIs('drivers.*')"
+                            :icon-image="asset('images/'.rawurlencode('system-uicons_users (1).png'))">
+                    Motoristas
                 </x-nav-link>
 
-                <x-nav-link :href="route('statistics.index')" :active="request()->routeIs('statistics.*')">
-                    <x-slot:icon>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </x-slot:icon>
+                <x-nav-link :href="route('statistics.index')" :active="request()->routeIs('statistics.*')"
+                            :icon-image="asset('images/system-uicons_graph-bar.png')">
                     Estatísticas
+                </x-nav-link>
+
+                <x-nav-link :href="route('vehicles.index')" :active="request()->routeIs('vehicles.*')"
+                            :icon-image="asset('images/carbon_bus.png')">
+                    Veículos
+                </x-nav-link>
+
+                <x-nav-link :href="route('trips.index')" :active="request()->routeIs('trips.*')"
+                            :icon-image="asset('images/system-uicons_document.png')">
+                    Viagens
+                </x-nav-link>
+
+                <x-nav-link :href="route('contracts.index')" :active="request()->routeIs('contracts.*')"
+                            :icon-image="asset('images/teenyicons_contract-outline.png')">
+                    Contratos
+                </x-nav-link>
+
+                <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.*')"
+                            :icon-image="asset('images/ion_wallet-outline.svg')">
+                    Pacotes
                 </x-nav-link>
 
                 <x-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
@@ -98,6 +87,13 @@
                     </x-slot:icon>
                     Atividades
                 </x-nav-link>
+
+                <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    <x-slot:icon>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </x-slot:icon>
+                    Usuários
+                </x-nav-link>
             </nav>
         </aside>
 
@@ -105,49 +101,20 @@
         <label for="sidebar-toggle"
                class="fixed inset-0 z-20 hidden bg-brand-900/40 peer-checked:block lg:hidden"></label>
 
-        {{-- Coluna principal --}}
+        {{-- Coluna principal (sem topbar; o fundo é branco) --}}
         <div class="flex min-w-0 flex-1 flex-col">
-            {{-- Topbar --}}
-            <header class="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-brand-100 bg-white px-4 sm:px-6">
-                <label for="sidebar-toggle"
-                       class="cursor-pointer rounded-lg p-2 text-brand-700 hover:bg-brand-50 lg:hidden">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </label>
-
-                <h1 class="text-base font-semibold text-brand-900">
-                    {{ $heading ?? $title }}
-                </h1>
-
-                {{-- Slot opcional para ações da página (botões, busca, etc.) --}}
-                <div class="ml-auto flex items-center gap-3">
-                    {{ $actions ?? '' }}
-
-                    <div class="flex items-center gap-2.5">
-                        <img src="{{ asset('images/fotoAdmin.png') }}" alt=""
-                             class="h-9 w-9 rounded-full object-cover ring-2 ring-brand-100" />
-                        <div class="hidden text-sm leading-tight sm:block">
-                            <p class="font-medium text-brand-900">{{ auth()->user()?->name ?? 'Administrador' }}</p>
-                            <p class="text-xs text-gray-500">Administrador</p>
-                        </div>
+            {{-- Padding horizontal dá respiro ao conteúdo; o pt maior no mobile
+                 abre espaço para o botão flutuante da sidebar. As tabelas "flush"
+                 cancelam esse padding lateral para encostar nas bordas. --}}
+            <main class="flex-1 px-4 pb-8 pt-16 sm:px-6 lg:px-8 lg:py-8">
+                {{-- Telas SEM toolbar: admin + sair alinhados à direita no topo,
+                     garantindo o logout acessível (Dashboard, Estatísticas, forms…). --}}
+                @unless ($toolbar)
+                    <div class="mb-6 flex justify-end">
+                        <x-user-menu />
                     </div>
+                @endunless
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                                class="rounded-lg p-2 text-gray-500 transition hover:bg-brand-50 hover:text-brand-700"
-                                title="Sair">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-            </header>
-
-            {{-- Conteúdo --}}
-            <main class="flex-1 p-4 sm:p-6 lg:p-8">
                 @if (session('status'))
                     <div class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
                         {{ session('status') }}
